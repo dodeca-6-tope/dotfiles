@@ -50,7 +50,7 @@
 	dc = diff --cached
 	di = diff --ignore-all-space
 	ds = diff --stat
-	dt = "!f() { git diff --name-only \"$@\" | fzf --preview \"git diff $* -- {} | delta --light --paging=never\" --preview-window=bottom:75%:wrap --header \"⏎ difftool | ^d copy path\" --bind \"enter:execute(git difftool -y $* -- {})+reload(git diff --name-only $*)\" --bind \"ctrl-d:execute-silent(echo -n {} | pbcopy)\"; }; f"
+	dt = "!f() { git diff --name-only \"$@\" | fzf --preview \"git diff $* -- {} | delta --light --paging=never\" --preview-window=bottom:75%:wrap --header \"⏎ difftool | ^d copy path\" --bind \"enter:execute(git difftool -y $* -- {})+reload(git diff --name-only $*)\" --bind \"ctrl-d:execute-silent(echo -n {} | clip)\"; }; f"
 	dp = "!f() { pr=$1; data=$(gh pr view $pr --json baseRefOid,headRefOid -q '.baseRefOid + \" \" + .headRefOid'); baseOid=${data%% *}; head=${data##* }; git fetch origin $baseOid $head 2>/dev/null; git dt $(git merge-base $baseOid $head)..$head; }; f"
 	dtc = difftool --cached
 
@@ -61,12 +61,6 @@
 	cl = clean -fdi
 
 	# Log
-	l = "!f() { base=$(git merge-base HEAD origin/develop 2>/dev/null || git merge-base HEAD origin/main 2>/dev/null); upstream=$(git rev-parse --abbrev-ref @{u} 2>/dev/null); if [ -n \"$upstream\" ]; then counts=$(git rev-list --left-right --count HEAD...@{u} 2>/dev/null); ahead=${counts%%\t*}; behind=${counts##*\t}; stats=\"↑$ahead ↓$behind\"; else stats=\"no upstream\"; fi; selected=$(git log $base..HEAD --oneline --abbrev-commit --no-decorate --first-parent --color=always | fzf --ansi --header \"$stats\") && printf \"%s\" \"$(echo \"$selected\" | awk '{print $1}')\" | pbcopy; }; f"
+	l = "!f() { base=$(git merge-base HEAD origin/develop 2>/dev/null || git merge-base HEAD origin/main 2>/dev/null); upstream=$(git rev-parse --abbrev-ref @{u} 2>/dev/null); if [ -n \"$upstream\" ]; then counts=$(git rev-list --left-right --count HEAD...@{u} 2>/dev/null); ahead=${counts%%\t*}; behind=${counts##*\t}; stats=\"↑$ahead ↓$behind\"; else stats=\"no upstream\"; fi; selected=$(git log $base..HEAD --oneline --abbrev-commit --no-decorate --first-parent --color=always | fzf --ansi --header \"$stats\") && printf \"%s\" \"$(echo \"$selected\" | awk '{print $1}')\" | clip; }; f"
 
-# Credentials
-[credential "https://github.com"]
-	helper = 
-	helper = !/opt/homebrew/bin/gh auth git-credential
-[credential "https://gist.github.com"]
-	helper = 
-	helper = !/opt/homebrew/bin/gh auth git-credential
+# Credentials (set by `gh auth setup-git`)

@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-[ "$(uname)" == "Darwin" ] || { echo "macOS only"; exit 1; }
+OS="$(uname -s)"
 
-# --- brew ---
+# --- packages ---
+if [ "$OS" == "Darwin" ]; then
+
 if [ ! -f /opt/homebrew/bin/brew ]; then
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
@@ -32,12 +34,48 @@ for app in \
 done
 dockutil --add ~/Downloads --view fan --display stack &>/dev/null
 
+elif [ "$OS" == "Linux" ]; then
+
+sudo apt update -qq
+sudo apt install -y -qq bat curl ffmpeg git imagemagick jq tmux tree unzip wget zsh xclip
+
+# fzf (apt version is too old, no --tmux support)
+FZF_VER=$(curl -s https://api.github.com/repos/junegunn/fzf/releases/latest | jq -r '.tag_name')
+curl -sL "https://github.com/junegunn/fzf/releases/download/${FZF_VER}/fzf-${FZF_VER#v}-linux_$(dpkg --print-architecture).tar.gz" | sudo tar xz -C /usr/local/bin
+
+# gh CLI
+if ! command -v gh &>/dev/null; then
+  curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+  echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+  sudo apt update -qq && sudo apt install -y -qq gh
+fi
+
+# git-delta
+if ! command -v delta &>/dev/null; then
+  DELTA_VER=$(curl -s https://api.github.com/repos/dandavison/delta/releases/latest | jq -r '.tag_name')
+  curl -sL "https://github.com/dandavison/delta/releases/download/${DELTA_VER}/git-delta_${DELTA_VER}_$(dpkg --print-architecture).deb" -o /tmp/delta.deb
+  sudo dpkg -i /tmp/delta.deb && rm -f /tmp/delta.deb
+fi
+
+# node
+if ! command -v node &>/dev/null; then
+  curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+  sudo apt install -y -qq nodejs
+fi
+
+fi
+
 # --- gcloud ---
 if ! command -v gcloud &>/dev/null; then
-  curl -sO https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-darwin-arm.tar.gz
-  tar -xf google-cloud-cli-darwin-arm.tar.gz -C "$HOME"
+  case "$(uname -s)-$(uname -m)" in
+    Darwin-arm64)  GCLOUD_ARCHIVE="google-cloud-cli-darwin-arm.tar.gz" ;;
+    Linux-x86_64)  GCLOUD_ARCHIVE="google-cloud-cli-linux-x86_64.tar.gz" ;;
+    Linux-aarch64) GCLOUD_ARCHIVE="google-cloud-cli-linux-arm.tar.gz" ;;
+  esac
+  curl -sO "https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/${GCLOUD_ARCHIVE}"
+  tar -xf "$GCLOUD_ARCHIVE" -C "$HOME"
   "$HOME/google-cloud-sdk/install.sh" --quiet
-  rm -f google-cloud-cli-darwin-arm.tar.gz
+  rm -f "$GCLOUD_ARCHIVE"
   source "$HOME/google-cloud-sdk/path.bash.inc"
 fi
 gcloud auth print-identity-token &>/dev/null || gcloud auth login --no-launch-browser
@@ -49,7 +87,6 @@ fi
 
 # --- github ---
 gh auth status > /dev/null 2>&1 || gh auth login
-gh auth setup-git
 
 # --- dotfiles ---
 if [ ! -d ~/.dotfiles ]; then
@@ -57,6 +94,7 @@ if [ ! -d ~/.dotfiles ]; then
 fi
 git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" config status.showUntrackedFiles no
 git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" checkout -f
+gh auth setup-git
 git config --global user.name "$(gh api user -q '.login')"
 git config --global user.email "$(gh api user -q '"\(.id)+\(.login)@users.noreply.github.com"')"
 
@@ -75,6 +113,6 @@ if ! command -v claude &>/dev/null; then
 fi
 
 # --- default shell ---
-[[ "$SHELL" == */zsh ]] || chsh -s /bin/zsh
+[[ "$SHELL" == */zsh ]] || chsh -s "$(which zsh)"
 
 exec zsh -l

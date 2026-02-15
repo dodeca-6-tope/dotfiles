@@ -15,7 +15,7 @@ plugins=(
 source $ZSH/oh-my-zsh.sh
 
 # PATH
-export PATH=/opt/homebrew/bin:$PATH
+[[ -d /opt/homebrew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
 export PATH="$HOME/.local/bin:$PATH"
 
 
