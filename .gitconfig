@@ -43,7 +43,7 @@
 
 	# Push
 	p = push
-	pf = push -f
+	pf = push --force-with-lease
 
 	# Diff
 	d = diff
