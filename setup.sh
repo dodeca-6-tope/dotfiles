@@ -14,7 +14,7 @@ for pkg in dockutil ffmpeg fzf gh imagemagick jq node tmux wget zsh tree git-del
   brew install "$pkg"
 done
 for cask in discord docker google-chrome slack visual-studio-code vlc whatsapp; do
-  brew install --cask --adopt "$cask"
+  brew list --cask "$cask" &>/dev/null || brew install --cask --adopt "$cask"
 done
 
 # --- macOS defaults ---
@@ -64,6 +64,10 @@ if ! command -v node &>/dev/null; then
 fi
 
 fi
+
+# --- corepack (yarn/pnpm, not bundled with Node 25+) ---
+npm install -g corepack
+corepack enable
 
 # --- gcloud ---
 if ! command -v gcloud &>/dev/null; then
