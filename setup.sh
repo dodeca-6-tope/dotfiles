@@ -66,8 +66,10 @@ fi
 fi
 
 # --- corepack (yarn/pnpm, not bundled with Node 25+) ---
-npm install -g corepack
-corepack enable
+if [ "$OS" == "Darwin" ]; then
+  npm install -g corepack
+  corepack enable
+fi
 
 # --- gcloud ---
 if ! command -v gcloud &>/dev/null; then
