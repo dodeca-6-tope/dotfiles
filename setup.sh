@@ -13,7 +13,7 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 for pkg in dockutil ffmpeg fzf gh imagemagick jq node tmux wget zsh tree git-delta; do
   brew install "$pkg"
 done
-for cask in discord docker google-chrome slack visual-studio-code vlc whatsapp; do
+for cask in discord docker ghostty google-chrome slack visual-studio-code vlc whatsapp; do
   brew list --cask "$cask" &>/dev/null || brew install --cask --adopt "$cask"
 done
 
@@ -24,7 +24,7 @@ dockutil --remove all --no-restart &>/dev/null
 for app in \
   "/System/Applications/System Settings.app" \
   "/Applications/Slack.app" \
-  "/System/Applications/Utilities/Terminal.app" \
+  "/Applications/Ghostty.app" \
   "/Applications/1Password.app" \
   "/Applications/Google Chrome.app" \
   "/Applications/WhatsApp.app" \
