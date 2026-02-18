@@ -1,0 +1,6 @@
+shell-integration-features = ssh-env
+font-family = SF Mono
+font-style = Medium
+font-size = 16
+theme = light:Apple System Colors Light,dark:Ghostty Default Style Dark
+window-theme = auto
