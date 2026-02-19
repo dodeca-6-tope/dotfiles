@@ -20,6 +20,8 @@ done
 # --- macOS defaults ---
 defaults write com.apple.WindowManager GloballyEnabled -bool true
 defaults write com.apple.dock autohide -bool true
+defaults write com.apple.dock show-recents -bool false
+defaults write com.apple.dock showAppSuggestions -bool false
 dockutil --remove all --no-restart &>/dev/null
 for app in \
   "/System/Applications/System Settings.app" \
