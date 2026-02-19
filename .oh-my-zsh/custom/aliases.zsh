@@ -94,7 +94,8 @@ cdl() {
   [[ -z "$selected" ]] && return 0
 
   echo "$selected" | while read -r file; do
-    scp "coder.$workspace:$file" "$HOME/Downloads/"
-    [[ "$(uname)" == "Darwin" ]] && open "$HOME/Downloads/$(basename "$file")"
+    local dest="$HOME/Downloads/$(basename "$file")"
+    rsync -az "coder.$workspace:$file" "$dest"
+    [[ "$(uname)" == "Darwin" ]] && open "$dest"
   done
 }
