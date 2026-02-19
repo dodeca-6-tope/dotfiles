@@ -83,3 +83,18 @@ p() {
     --bind "ctrl-o:execute(gh pr checkout {1})+abort" \
     --bind "ctrl-r:reload(zsh -c 'source ~/.oh-my-zsh/custom/aliases.zsh && _p_fetch')"
 }
+
+cdl() {
+  local workspace selected
+  workspace=$(coder list --output json 2>/dev/null | python3 -c "import json,sys; [print(w['name']) for w in json.load(sys.stdin)]" | fzf --prompt="Workspace> ")
+  [[ -z "$workspace" ]] && return 0
+
+  selected=$(coder ssh "$workspace" -- bash -c "find ~ -type f -mmin -10" 2>/dev/null \
+    | tr -d '\r' | fzf --multi --prompt="Files> " --header="Loading..." --bind="load:change-header:")
+  [[ -z "$selected" ]] && return 0
+
+  echo "$selected" | while read -r file; do
+    scp "coder.$workspace:$file" "$HOME/Downloads/"
+    [[ "$(uname)" == "Darwin" ]] && open "$HOME/Downloads/$(basename "$file")"
+  done
+}
