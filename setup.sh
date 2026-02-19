@@ -100,8 +100,9 @@ gh auth status > /dev/null 2>&1 || gh auth login
 if [ ! -d ~/.dotfiles ]; then
   git clone --bare https://github.com/dodeca-6-tope/dotfiles.git ~/.dotfiles
 fi
+git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" fetch origin main
+git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" reset --hard FETCH_HEAD
 git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" config status.showUntrackedFiles no
-git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" checkout -f
 gh auth setup-git
 git config --global user.name "$(gh api user -q '.login')"
 git config --global user.email "$(gh api user -q '"\(.id)+\(.login)@users.noreply.github.com"')"
