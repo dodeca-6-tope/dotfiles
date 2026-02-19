@@ -1,4 +1,4 @@
-shell-integration-features = ssh-terminfo
+shell-integration-features = ssh-terminfo,ssh-env
 font-family = SF Mono
 font-style = Medium
 font-size = 17
