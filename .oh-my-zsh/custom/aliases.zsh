@@ -89,7 +89,7 @@ cdl() {
   workspace=$(coder list --output json 2>/dev/null | python3 -c "import json,sys; [print(w['name']) for w in json.load(sys.stdin)]" | fzf --prompt="Workspace> ")
   [[ -z "$workspace" ]] && return 0
 
-  selected=$(coder ssh "$workspace" -- bash -c "find ~ -type f -mmin -10" 2>/dev/null \
+  selected=$(ssh "coder.$workspace" "find ~ -name '.*' -prune -o -type f -print" 2>/dev/null \
     | tr -d '\r' | fzf --multi --prompt="Files> " --header="Loading..." --bind="load:change-header:")
   [[ -z "$selected" ]] && return 0
 
