@@ -39,7 +39,7 @@ dockutil --add ~/Downloads --view fan --display stack &>/dev/null
 elif [ "$OS" == "Linux" ]; then
 
 sudo apt update -qq
-sudo apt install -y -qq bat curl ffmpeg git imagemagick jq tmux tree unzip wget zsh xclip
+sudo apt install -y -qq bat curl ffmpeg git imagemagick jq rsync tmux tree unzip wget zsh xclip
 
 # fzf (apt version is too old, no --tmux support)
 FZF_VER=$(curl -s https://api.github.com/repos/junegunn/fzf/releases/latest | jq -r '.tag_name')
