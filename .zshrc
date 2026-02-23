@@ -8,9 +8,7 @@ export ZSH="$HOME/.oh-my-zsh"
 ZSH_THEME="powerlevel10k/powerlevel10k"
 DISABLE_AUTO_TITLE="true"
 plugins=(
-  git
   zsh-autosuggestions
-  zsh-bat
 )
 source $ZSH/oh-my-zsh.sh
 

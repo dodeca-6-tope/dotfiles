@@ -110,7 +110,7 @@ git config --global user.email "$(gh api user -q '"\(.id)+\(.login)@users.norepl
 # --- zsh plugins ---
 ZSH_PLUGINS="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins"
 [ -d "$ZSH_PLUGINS/zsh-autosuggestions" ] || git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions.git "$ZSH_PLUGINS/zsh-autosuggestions"
-[ -d "$ZSH_PLUGINS/zsh-bat" ] || git clone --depth=1 https://github.com/fdellwing/zsh-bat.git "$ZSH_PLUGINS/zsh-bat"
+
 
 # --- powerlevel10k ---
 P10K="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
