@@ -110,6 +110,7 @@ git config --global user.email "$(gh api user -q '"\(.id)+\(.login)@users.norepl
 # --- zsh plugins ---
 ZSH_PLUGINS="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins"
 [ -d "$ZSH_PLUGINS/zsh-autosuggestions" ] || git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions.git "$ZSH_PLUGINS/zsh-autosuggestions"
+[ -d "$ZSH_PLUGINS/fzf-tab" ] || git clone --depth=1 https://github.com/Aloxaf/fzf-tab.git "$ZSH_PLUGINS/fzf-tab"
 
 
 # --- powerlevel10k ---
