@@ -2,7 +2,6 @@
 
 ## Code Style
 
-- Don't add types, interfaces, or abstractions unless they're used in 3+ places
 - Don't create wrapper files (barrels, re-exports) unless asked
 - Prefer inline strings over enum constants
 - No type casts
