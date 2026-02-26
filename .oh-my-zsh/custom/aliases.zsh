@@ -12,7 +12,7 @@ else
 fi
 
 # FZF
-export FZF_DEFAULT_OPTS="--layout reverse --no-separator"
+export FZF_DEFAULT_OPTS="--layout reverse --no-separator --border none"
 
 # PR dashboard
 _p_list() {
@@ -35,11 +35,11 @@ _p_list() {
 }
 
 p() {
-  _p_list | fzf --tmux 75%,15,border-native \
+  _p_list | fzf --tmux 100%,100% \
     --ansi --delimiter='\t' --with-nth=3.. --tabstop=1 --no-hscroll \
     --header "⏎ view | ^d diff | ^o checkout | ^r refresh" \
     --bind 'enter:execute-silent(open {2})' \
-    --bind 'ctrl-d:become(git dp {1})' \
+    --bind 'ctrl-d:execute(git dp {1})' \
     --bind 'ctrl-o:become(gh pr checkout {1})' \
     --bind "ctrl-r:reload(zsh -c 'source ~/.oh-my-zsh/custom/aliases.zsh && _p_list')"
 }
