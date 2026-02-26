@@ -14,31 +14,45 @@ fi
 # FZF
 export FZF_DEFAULT_OPTS="--layout reverse --no-separator"
 
-# PR dashboard
-_p_fetch() {
-  gh pr list --search "involves:@me" --json number,title,author,statusCheckRollup,reviewDecision | jq -r '.[] |
-    (.reviewDecision | if . == "APPROVED" then "\u001b[32m●"
-      elif . == "CHANGES_REQUESTED" then "\u001b[31m●"
-      else "\u001b[90m○" end) as $rv |
-    (.statusCheckRollup | if length == 0 then "\u001b[90m□"
-      elif all(.conclusion == "SUCCESS") then "\u001b[32m■"
-      elif any(.conclusion == "FAILURE") then "\u001b[31m■"
-      else "\u001b[33m■" end) as $ci |
-    "\u001b[32m\(.number | tostring | (. + "     ")[:5])\u001b[0m \($rv) \($ci)\u001b[0m \u001b[36m\(.author.login | (. + "               ")[:15])\u001b[0m \(.title)"
-  '
+_fzf_tmux_fit() {
+  local width=${1:-80%} padding=${2:-3} input=$(cat)
+  [[ -z "$input" ]] && return 1
+  local height=$(( $(echo "$input" | wc -l | tr -d ' ') + padding ))
+  echo "$input" | fzf --tmux "center,${width},${height}" "${@:3}"
 }
 
+# PR dashboard
 p() {
-  _p_fetch | fzf --ansi --header "⏎ view | ^d diff | ^o checkout | ^r refresh" \
+  gh pr list --search "involves:@me" \
+    --json number,title,author,statusCheckRollup,reviewDecision \
+  | jq -r '.[] |
+    def icon(ok; bad): if . == ok then "\u001b[32m" elif . == bad then "\u001b[31m" else "\u001b[90m" end;
+    def pad(n): (. + "               ")[:n];
+
+    (.reviewDecision | icon("APPROVED"; "CHANGES_REQUESTED")) as $rv |
+    (if (.statusCheckRollup | length) == 0 then "\u001b[90m"
+     elif (.statusCheckRollup | any(.conclusion == "FAILURE")) then "\u001b[31m"
+     elif (.statusCheckRollup | all(.conclusion == "SUCCESS")) then "\u001b[32m"
+     else "\u001b[33m" end) as $ci |
+
+    "\u001b[32m\(.number | tostring | pad(5))\u001b[0m \($rv)● \($ci)■\u001b[0m\t\u001b[36m\(.author.login | pad(15))\u001b[0m\t\(.title)"
+  ' \
+  | _fzf_tmux_fit 80% 3 \
+    --ansi --delimiter='\t' --tabstop=1 --no-hscroll \
+    --header "⏎ view | ^d diff | ^o checkout | ^r refresh" \
     --bind "enter:execute(gh pr view --web {1})" \
     --bind "ctrl-d:execute(git dp {1})+abort" \
     --bind "ctrl-o:execute(gh pr checkout {1})+abort" \
-    --bind "ctrl-r:reload(zsh -c 'source ~/.oh-my-zsh/custom/aliases.zsh && _p_fetch')"
+    --bind "ctrl-r:reload(zsh -c 'source ~/.oh-my-zsh/custom/aliases.zsh && p')" \
+  || echo "No PRs found."
 }
 
+# Download files from Coder workspace
 cdl() {
   local workspace selected
-  workspace=$(coder list --output json 2>/dev/null | python3 -c "import json,sys; [print(w['name']) for w in json.load(sys.stdin)]" | fzf --prompt="Workspace> ")
+  workspace=$(coder list --output json 2>/dev/null \
+    | python3 -c "import json,sys; [print(w['name']) for w in json.load(sys.stdin)]" \
+    | fzf --prompt="Workspace> ")
   [[ -z "$workspace" ]] && return 0
 
   selected=$(ssh "coder.$workspace" "find ~ -name '.*' -prune -o -type f -print" 2>/dev/null \
