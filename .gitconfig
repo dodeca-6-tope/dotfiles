@@ -50,7 +50,7 @@
 	dc = diff --cached
 	di = diff --ignore-all-space
 	ds = diff --stat
-	dt = "!f() { git diff --name-only \"$@\" | fzf --tmux 100%,100% --preview \"git diff $* -- {} | delta --light --paging=never\" --preview-window=bottom:75%:wrap --header \"⏎ difftool | ^d copy path\" --bind \"enter:execute(git difftool -y $* -- {})+reload(git diff --name-only $*)\" --bind \"ctrl-d:execute-silent(echo -n {} | clip)\"; }; f"
+	dt = "!f() { git diff --name-only \"$@\" | fzf --tmux 100%,100% --border none --preview \"git diff $* -- {} | delta --light --paging=never\" --preview-window=bottom:85%:wrap:border-top --header \"⏎ difftool | ^d copy path\" --bind \"enter:execute(git difftool -y $* -- {})+reload(git diff --name-only $*)\" --bind \"ctrl-d:execute-silent(echo -n {} | clip)\"; }; f"
 	dp = "!f() { pr=$1; data=$(gh pr view $pr --json baseRefOid,headRefOid -q '.baseRefOid + \" \" + .headRefOid'); baseOid=${data%% *}; head=${data##* }; git fetch origin $baseOid $head 2>/dev/null; git dt $(git merge-base $baseOid $head)..$head; }; f"
 	dtc = difftool --cached
 
