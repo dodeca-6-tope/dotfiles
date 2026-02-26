@@ -1,6 +1,7 @@
 shell-integration-features = ssh-terminfo,ssh-env
 font-family = SF Mono
-font-style = Medium
-font-size = 17
+font-style = Regular
+font-size = 18
+font-thicken = true
 theme = light:Apple System Colors Light,dark:Ghostty Default Style Dark
 window-theme = auto
