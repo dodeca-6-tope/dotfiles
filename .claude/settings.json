@@ -7,5 +7,9 @@
   "attribution": {
     "commit": "",
     "pr": ""
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "bash /Users/amyitzhack/.claude/statusline-command.sh"
   }
 }
