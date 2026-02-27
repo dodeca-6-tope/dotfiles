@@ -10,6 +10,7 @@ if [ "$OS" == "Darwin" ]; then
   fi
   eval "$(/opt/homebrew/bin/brew shellenv)"
   brew bundle install --file=~/Brewfile
+  brew bundle cleanup --force --file=~/Brewfile
 
   # macOS defaults
   defaults write com.apple.WindowManager GloballyEnabled -bool true
