@@ -16,6 +16,8 @@ if [ "$OS" == "Darwin" ]; then
   defaults write com.apple.dock autohide -bool true
   defaults write com.apple.dock show-recents -bool false
   defaults write com.apple.dock showAppSuggestions -bool false
+  defaults write com.apple.AppleMultitouchTrackpad Clicking -bool true
+  defaults write com.apple.finder FXPreferredViewStyle -string clmv
   dockutil --remove all --no-restart &>/dev/null
   for app in \
     "/System/Applications/System Settings.app" \
