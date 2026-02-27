@@ -6,7 +6,7 @@
   "model": "opus[1m]",
   "statusLine": {
     "type": "command",
-    "command": "bash /Users/amyitzhack/.claude/statusline-command.sh"
+    "command": "bash ~/.claude/statusline-command.sh"
   },
   "enabledPlugins": {
     "code-review@claude-plugins-official": true,

@@ -5,69 +5,66 @@ OS="$(uname -s)"
 
 # --- packages ---
 if [ "$OS" == "Darwin" ]; then
+  if [ ! -f /opt/homebrew/bin/brew ]; then
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  fi
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+  for pkg in dockutil ffmpeg fzf gh imagemagick jq node tmux wget zsh tree git-delta; do
+    brew install "$pkg"
+  done
+  for cask in discord docker ghostty google-chrome slack visual-studio-code vlc whatsapp; do
+    brew list --cask "$cask" &>/dev/null || brew install --cask --adopt "$cask"
+  done
 
-if [ ! -f /opt/homebrew/bin/brew ]; then
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-fi
-eval "$(/opt/homebrew/bin/brew shellenv)"
-for pkg in dockutil ffmpeg fzf gh imagemagick jq node tmux wget zsh tree git-delta; do
-  brew install "$pkg"
-done
-for cask in discord docker ghostty google-chrome slack visual-studio-code vlc whatsapp; do
-  brew list --cask "$cask" &>/dev/null || brew install --cask --adopt "$cask"
-done
-
-# --- macOS defaults ---
-defaults write com.apple.WindowManager GloballyEnabled -bool true
-defaults write com.apple.dock autohide -bool true
-defaults write com.apple.dock show-recents -bool false
-defaults write com.apple.dock showAppSuggestions -bool false
-dockutil --remove all --no-restart &>/dev/null
-for app in \
-  "/System/Applications/System Settings.app" \
-  "/Applications/Slack.app" \
-  "/Applications/Ghostty.app" \
-  "/Applications/1Password.app" \
-  "/Applications/Google Chrome.app" \
-  "/Applications/WhatsApp.app" \
-  "/Applications/Visual Studio Code.app" \
-  "/System/Applications/Utilities/Activity Monitor.app"; do
-  dockutil --add "$app" --no-restart &>/dev/null
-done
-dockutil --add ~/Downloads --view fan --display stack &>/dev/null
+  # macOS defaults
+  defaults write com.apple.WindowManager GloballyEnabled -bool true
+  defaults write com.apple.dock autohide -bool true
+  defaults write com.apple.dock show-recents -bool false
+  defaults write com.apple.dock showAppSuggestions -bool false
+  dockutil --remove all --no-restart &>/dev/null
+  for app in \
+    "/System/Applications/System Settings.app" \
+    "/Applications/Slack.app" \
+    "/Applications/Ghostty.app" \
+    "/Applications/1Password.app" \
+    "/Applications/Google Chrome.app" \
+    "/Applications/WhatsApp.app" \
+    "/Applications/Visual Studio Code.app" \
+    "/System/Applications/Utilities/Activity Monitor.app"; do
+    dockutil --add "$app" --no-restart &>/dev/null
+  done
+  dockutil --add ~/Downloads --view fan --display stack &>/dev/null
 
 elif [ "$OS" == "Linux" ]; then
+  sudo apt update -qq
+  sudo apt install -y -qq bat curl ffmpeg git imagemagick jq rsync tmux tree unzip wget zsh xclip
 
-sudo apt update -qq
-sudo apt install -y -qq bat curl ffmpeg git imagemagick jq rsync tmux tree unzip wget zsh xclip
+  # fzf (apt version is too old, no --tmux support)
+  FZF_VER=$(curl -s https://api.github.com/repos/junegunn/fzf/releases/latest | jq -r '.tag_name')
+  curl -sL "https://github.com/junegunn/fzf/releases/download/${FZF_VER}/fzf-${FZF_VER#v}-linux_$(dpkg --print-architecture).tar.gz" | sudo tar xz -C /usr/local/bin
 
-# fzf (apt version is too old, no --tmux support)
-FZF_VER=$(curl -s https://api.github.com/repos/junegunn/fzf/releases/latest | jq -r '.tag_name')
-curl -sL "https://github.com/junegunn/fzf/releases/download/${FZF_VER}/fzf-${FZF_VER#v}-linux_$(dpkg --print-architecture).tar.gz" | sudo tar xz -C /usr/local/bin
+  # gh CLI
+  if ! command -v gh &>/dev/null; then
+    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+    sudo apt update -qq && sudo apt install -y -qq gh
+  fi
 
-# gh CLI
-if ! command -v gh &>/dev/null; then
-  curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
-  echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-  sudo apt update -qq && sudo apt install -y -qq gh
+  # git-delta
+  if ! command -v delta &>/dev/null; then
+    DELTA_VER=$(curl -s https://api.github.com/repos/dandavison/delta/releases/latest | jq -r '.tag_name')
+    curl -sL "https://github.com/dandavison/delta/releases/download/${DELTA_VER}/git-delta_${DELTA_VER}_$(dpkg --print-architecture).deb" -o /tmp/delta.deb
+    sudo dpkg -i /tmp/delta.deb && rm -f /tmp/delta.deb
+  fi
+
+  # node
+  if ! command -v node &>/dev/null; then
+    curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+    sudo apt install -y -qq nodejs
+  fi
 fi
 
-# git-delta
-if ! command -v delta &>/dev/null; then
-  DELTA_VER=$(curl -s https://api.github.com/repos/dandavison/delta/releases/latest | jq -r '.tag_name')
-  curl -sL "https://github.com/dandavison/delta/releases/download/${DELTA_VER}/git-delta_${DELTA_VER}_$(dpkg --print-architecture).deb" -o /tmp/delta.deb
-  sudo dpkg -i /tmp/delta.deb && rm -f /tmp/delta.deb
-fi
-
-# node
-if ! command -v node &>/dev/null; then
-  curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-  sudo apt install -y -qq nodejs
-fi
-
-fi
-
-# --- corepack (yarn/pnpm, not bundled with Node 25+) ---
+# --- corepack ---
 if [ "$OS" == "Darwin" ]; then
   npm install -g corepack
   corepack enable
@@ -111,7 +108,6 @@ git config -f ~/.gitconfig-local user.email "$(gh api user -q '"\(.id)+\(.login)
 ZSH_PLUGINS="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins"
 [ -d "$ZSH_PLUGINS/zsh-autosuggestions" ] || git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions.git "$ZSH_PLUGINS/zsh-autosuggestions"
 [ -d "$ZSH_PLUGINS/fzf-tab" ] || git clone --depth=1 https://github.com/Aloxaf/fzf-tab.git "$ZSH_PLUGINS/fzf-tab"
-
 
 # --- powerlevel10k ---
 P10K="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"

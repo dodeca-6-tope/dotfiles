@@ -55,10 +55,12 @@
 	dp = "!f() { pr=$1; data=$(gh pr view $pr --json baseRefOid,headRefOid -q '.baseRefOid + \" \" + .headRefOid'); baseOid=${data%% *}; head=${data##* }; git fetch origin $baseOid $head 2>/dev/null; git diff $(git merge-base $baseOid $head)..$head; }; f"
 	dtc = difftool --cached
 
+	# Stage
+	a = add
+
 	# Reset & clean
 	r = reset
 	rh = reset --hard
-	a = add
 	cl = clean -fdi
 
 	# Log
@@ -71,6 +73,7 @@
 [credential "https://gist.github.com"]
 	helper = 
 	helper = !/opt/homebrew/bin/gh auth git-credential
+
 # Identity (injected by setup.sh into ~/.gitconfig-local)
 [include]
 	path = ~/.gitconfig-local
