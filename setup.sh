@@ -104,8 +104,8 @@ git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" fetch origin main
 git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" reset --hard FETCH_HEAD
 git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" config status.showUntrackedFiles no
 gh auth setup-git
-git config --global user.name "$(gh api user -q '.login')"
-git config --global user.email "$(gh api user -q '"\(.id)+\(.login)@users.noreply.github.com"')"
+git config -f ~/.gitconfig-local user.name "$(gh api user -q '.login')"
+git config -f ~/.gitconfig-local user.email "$(gh api user -q '"\(.id)+\(.login)@users.noreply.github.com"')"
 
 # --- zsh plugins ---
 ZSH_PLUGINS="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins"
