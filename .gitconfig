@@ -2,6 +2,7 @@
 [core]
 	editor = code --wait
 	pager = delta
+	excludesFile = ~/.gitignore_global
 [diff]
 	tool = vscode
 [difftool]

@@ -9,12 +9,7 @@ if [ "$OS" == "Darwin" ]; then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   fi
   eval "$(/opt/homebrew/bin/brew shellenv)"
-  for pkg in dockutil ffmpeg fzf gh imagemagick jq node tmux wget zsh tree git-delta; do
-    brew install "$pkg"
-  done
-  for cask in discord docker ghostty google-chrome slack visual-studio-code vlc whatsapp; do
-    brew list --cask "$cask" &>/dev/null || brew install --cask --adopt "$cask"
-  done
+  brew bundle install --file=~/Brewfile
 
   # macOS defaults
   defaults write com.apple.WindowManager GloballyEnabled -bool true

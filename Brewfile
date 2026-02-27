@@ -1,0 +1,47 @@
+tap "coder/coder"
+tap "homebrew/services"
+
+# CLI tools
+brew "bat"
+brew "cloud-sql-proxy"
+brew "coder"
+brew "docker"
+brew "dockutil"
+brew "ffmpeg"
+brew "fzf"
+brew "gh"
+brew "git-delta"
+brew "gum"
+brew "imagemagick"
+brew "jq"
+brew "kubernetes-cli"
+brew "kubectx"
+brew "lazygit"
+brew "minikube"
+brew "mkcert"
+brew "node"
+brew "postgresql@14", restart_service: :changed
+brew "redis", restart_service: :changed
+brew "rsync"
+brew "tmux"
+brew "tree"
+brew "wget"
+brew "zsh"
+brew "argocd"
+
+# Apps
+cask "1password-cli"
+cask "discord"
+cask "docker-desktop"
+cask "font-fira-code-nerd-font"
+cask "font-meslo-lg-nerd-font"
+cask "gcloud-cli"
+cask "ghostty"
+cask "google-chrome"
+cask "slack"
+cask "visual-studio-code"
+cask "vlc"
+cask "whatsapp"
+
+# VS Code extensions
+vscode "coder.coder-remote"
