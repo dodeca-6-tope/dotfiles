@@ -71,6 +71,3 @@
 [credential "https://gist.github.com"]
 	helper = 
 	helper = !/opt/homebrew/bin/gh auth git-credential
-[user]
-	name = dodeca-6-tope
-	email = 21145501+dodeca-6-tope@users.noreply.github.com
