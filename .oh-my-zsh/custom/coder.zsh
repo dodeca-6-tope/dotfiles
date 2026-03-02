@@ -1,9 +1,9 @@
 # Download files from a Coder workspace to ~/Downloads and open them.
-# Usage: cdl
+# Usage: coder-dl
 #   1. Pick a workspace
 #   2. Pick files (multi-select with Tab)
 #   3. Files are downloaded and opened
-cdl() {
+coder-dl() {
   local workspace selected file dest
 
   # Pick workspace
