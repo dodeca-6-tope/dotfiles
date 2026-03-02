@@ -4,13 +4,6 @@ alias dot='git --git-dir=$HOME/.dotfiles --work-tree=$HOME'
 # Git
 alias g='git'
 
-# Clipboard
-if [[ "$(uname)" == "Darwin" ]]; then
-  alias clip='pbcopy'
-else
-  alias clip='xclip -selection clipboard'
-fi
-
 # FZF
 export FZF_DEFAULT_OPTS="--layout reverse --no-separator --border none"
 
