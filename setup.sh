@@ -114,6 +114,10 @@ P10K="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
 if ! command -v claude &>/dev/null; then
   curl -fsSL https://claude.ai/install.sh | bash
 fi
+claude mcp add --transport http --scope user figma https://mcp.figma.com/mcp 2>/dev/null || true
+claude mcp add --transport http --scope user linear-server https://mcp.linear.app/mcp 2>/dev/null || true
+claude mcp add --transport http --scope user sentry https://mcp.sentry.dev/mcp 2>/dev/null || true
+claude mcp add --transport stdio --scope user playwright -- npx -y @playwright/mcp@latest 2>/dev/null || true
 
 # --- default shell ---
 [[ "$SHELL" == */zsh ]] || chsh -s "$(which zsh)"
