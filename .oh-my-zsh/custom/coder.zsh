@@ -1,31 +1,18 @@
-# Download files from a Coder workspace to ~/Downloads and open them.
-# Usage: coder-dl
-#   1. Pick a workspace
-#   2. Pick files (multi-select with Tab)
-#   3. Files are downloaded and opened
-coder-dl() {
-  local workspace selected file dest
-
-  # Pick workspace
-  workspace=$(
-    coder list --output json 2>/dev/null \
-      | python3 -c "import json,sys; [print(w['name']) for w in json.load(sys.stdin)]" \
-      | fzf --prompt="Workspace> "
-  )
-  [[ -z "$workspace" ]] && return 0
-
-  # Pick files
-  selected=$(
-    ssh "coder.$workspace" "find ~ -name '.*' -prune -o -type f -print" 2>/dev/null \
-      | tr -d '\r' \
-      | fzf --multi --prompt="Files> " --header="Loading..." --bind="load:change-header:"
-  )
-  [[ -z "$selected" ]] && return 0
-
-  # Download and open
-  echo "$selected" | while read -r file; do
-    dest="$HOME/Downloads/$(basename "$file")"
-    rsync -az "coder.$workspace:$file" "$dest"
-    [[ "$(uname)" == "Darwin" ]] && open "$dest"
-  done
+# Download a file from a Coder workspace to ~/Downloads and open it.
+# Usage: coder-scp <workspace> <remote-path> [local-dest]
+# Example: coder-scp black-magic /tmp/surfer_comparison.zip
+coder-scp() {
+  local workspace="$1" file="$2"
+  local user; user=$(coder whoami --output json 2>/dev/null | python3 -c "import json,sys; print(json.load(sys.stdin)[0]['username'])")
+  local dest="${3:-$HOME/Downloads/$(basename "$file")}"
+  scp "main.$workspace.$user.coder:$file" "$dest"
+  [[ "$(uname)" == "Darwin" ]] && open "$dest"
 }
+
+_coder-scp() {
+  if (( CURRENT == 2 )); then
+    local workspaces; workspaces=($(coder list --output json 2>/dev/null | python3 -c "import json,sys; [print(w['name']) for w in json.load(sys.stdin)]"))
+    _describe 'workspace' workspaces
+  fi
+}
+compdef _coder-scp coder-scp
