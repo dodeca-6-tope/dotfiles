@@ -16,6 +16,7 @@
 
 # Delta
 [delta]
+	pager = less -R --mouse
 	light = true
 	navigate = true
 	line-numbers = true
