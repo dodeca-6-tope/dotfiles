@@ -24,5 +24,10 @@ export PATH="$HOME/.local/bin:$PATH"
 # Secrets
 [[ -f ~/.secrets ]] && source ~/.secrets
 
+# Fall back TERM when SSH'd from Ghostty into a host without its terminfo
+if [[ $TERM == xterm-ghostty ]] && ! infocmp xterm-ghostty &>/dev/null; then
+  export TERM=xterm-256color
+fi
+
 # Powerlevel10k
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
