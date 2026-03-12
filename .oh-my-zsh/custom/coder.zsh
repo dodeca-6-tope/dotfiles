@@ -1,3 +1,6 @@
+# Let ~/.gitconfig-local identity take precedence over Coder's env vars
+unset GIT_AUTHOR_NAME GIT_COMMITTER_NAME GIT_AUTHOR_EMAIL GIT_COMMITTER_EMAIL
+
 # Download a file from a Coder workspace to ~/Downloads and open it.
 # Usage: coder-scp <workspace> <remote-path> [local-dest]
 # Example: coder-scp black-magic /tmp/surfer_comparison.zip
