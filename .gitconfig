@@ -67,7 +67,7 @@
 	cl = clean -fdi
 
 	# Log
-	l = "!git log --oneline $(git rev-parse @{u} 2>/dev/null || git merge-base HEAD origin/develop 2>/dev/null || git merge-base HEAD origin/main 2>/dev/null)..HEAD"
+	l = "!base=$(git merge-base HEAD origin/HEAD 2>/dev/null); if [ -z \"$base\" ] || [ \"$(git rev-parse HEAD)\" = \"$base\" ]; then git log --oneline --first-parent; else git log --oneline $base..HEAD; fi"
 
 # Credentials (set by `gh auth setup-git`)
 [credential "https://github.com"]
