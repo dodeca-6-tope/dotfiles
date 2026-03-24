@@ -26,6 +26,7 @@ brew "rsync"
 brew "tmux"
 brew "tree"
 brew "wget"
+brew "zoxide"
 brew "zsh"
 brew "argocd"
 
