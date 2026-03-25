@@ -47,10 +47,10 @@ elif [ "$OS" == "Linux" ]; then
     sudo apt update -qq && sudo apt install -y -qq gh
   fi
 
-  # git-delta
+  # git-delta (use musl build to avoid glibc version issues on older distros)
   if ! command -v delta &>/dev/null; then
     DELTA_VER=$(curl -s https://api.github.com/repos/dandavison/delta/releases/latest | jq -r '.tag_name')
-    curl -sL "https://github.com/dandavison/delta/releases/download/${DELTA_VER}/git-delta_${DELTA_VER}_$(dpkg --print-architecture).deb" -o /tmp/delta.deb
+    curl -sL "https://github.com/dandavison/delta/releases/download/${DELTA_VER}/git-delta-musl_${DELTA_VER}_$(dpkg --print-architecture).deb" -o /tmp/delta.deb
     sudo dpkg -i /tmp/delta.deb && rm -f /tmp/delta.deb
   fi
 
