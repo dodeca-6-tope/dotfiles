@@ -17,6 +17,7 @@
   "disabledMcpjsonServers": ["figma", "sentry", "linear", "playwright"],
   "permissions": {
     "allow": ["Bash", "Read", "Write", "Edit", "Glob", "Grep", "Agent", "WebFetch", "WebSearch", "NotebookEdit", "mcp__*"],
+    "deny": ["Bash(git push:*)"],
     "defaultMode": "bypassPermissions"
   },
   "skipDangerousModePermissionPrompt": true
