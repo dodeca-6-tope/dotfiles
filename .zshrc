@@ -31,3 +31,7 @@ fi
 
 # Powerlevel10k
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+# Reset kitty keyboard protocol before each prompt (Claude Code cleanup workaround)
+reset_kitty_protocol() { printf '\e[<u' >/dev/tty 2>/dev/null }
+precmd_functions+=(reset_kitty_protocol)
