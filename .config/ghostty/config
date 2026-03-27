@@ -6,3 +6,5 @@ font-thicken = true
 theme = light:Apple System Colors Light,dark:Ghostty Default Style Dark
 window-theme = auto
 cursor-style = block
+keybind = page_up=scroll_page_up
+keybind = page_down=scroll_page_down
