@@ -34,7 +34,7 @@ if [ "$OS" == "Darwin" ]; then
 
 elif [ "$OS" == "Linux" ]; then
   sudo apt update -qq
-  sudo apt install -y -qq bat curl ffmpeg git imagemagick jq rsync tmux tree unzip wget zsh xclip
+  sudo apt install -y -qq bat curl ffmpeg git imagemagick jq rsync tmux tree unzip wget zoxide zsh xclip
 
   # fzf (apt version is too old, no --tmux support)
   FZF_VER=$(curl -s https://api.github.com/repos/junegunn/fzf/releases/latest | jq -r '.tag_name')
