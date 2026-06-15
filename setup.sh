@@ -84,7 +84,7 @@ gcloud auth print-identity-token &>/dev/null || gcloud auth login --no-launch-br
 
 # --- oh-my-zsh ---
 if [ ! -d ~/.oh-my-zsh ]; then
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended --keep-zshrc
 fi
 
 # --- github ---
