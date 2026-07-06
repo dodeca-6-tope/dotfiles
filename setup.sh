@@ -33,31 +33,57 @@ if [ "$OS" == "Darwin" ]; then
   dockutil --add ~/Downloads --view fan --display stack &>/dev/null
 
 elif [ "$OS" == "Linux" ]; then
+  export PATH="$HOME/.local/bin:$PATH"
+  mkdir -p "$HOME/.local/bin"
+  DPKG_ARCH="$(dpkg --print-architecture)"          # amd64 | arm64
+  case "$DPKG_ARCH" in amd64) RUST_ARCH=x86_64 ;; arm64) RUST_ARCH=aarch64 ;; esac
+  gh_latest() { curl -s "https://api.github.com/repos/$1/releases/latest" | jq -r '.tag_name'; }
+
   sudo apt update -qq
-  sudo apt install -y -qq bat curl ffmpeg git imagemagick jq rsync tmux tree unzip wget zoxide zsh xclip
+  sudo apt install -y -qq curl ffmpeg git jq tree unzip wget zsh
+
+  # Portable binaries -> ~/.local/bin: on the ephemeral container rootfs only $HOME
+  # survives reboots, so these must not go under /usr.
+
+  # tmux (static build)
+  if ! command -v tmux &>/dev/null; then
+    TMUX_VER=$(gh_latest mjakob-gh/build-static-tmux)
+    curl -sL "https://github.com/mjakob-gh/build-static-tmux/releases/download/${TMUX_VER}/tmux.linux-${DPKG_ARCH}.stripped.gz" | gzip -dc > "$HOME/.local/bin/tmux"
+    chmod +x "$HOME/.local/bin/tmux"
+  fi
 
   # fzf (apt version is too old, no --tmux support)
-  FZF_VER=$(curl -s https://api.github.com/repos/junegunn/fzf/releases/latest | jq -r '.tag_name')
-  curl -sL "https://github.com/junegunn/fzf/releases/download/${FZF_VER}/fzf-${FZF_VER#v}-linux_$(dpkg --print-architecture).tar.gz" | sudo tar xz -C /usr/local/bin
+  if ! command -v fzf &>/dev/null; then
+    FZF_VER=$(gh_latest junegunn/fzf)
+    curl -sL "https://github.com/junegunn/fzf/releases/download/${FZF_VER}/fzf-${FZF_VER#v}-linux_${DPKG_ARCH}.tar.gz" | tar xz -C "$HOME/.local/bin"
+  fi
+
+  # git-delta (musl build avoids glibc issues on older distros)
+  if ! command -v delta &>/dev/null; then
+    DELTA_VER=$(gh_latest dandavison/delta)
+    [ "$DPKG_ARCH" = amd64 ] && DELTA_TRIPLE="${RUST_ARCH}-unknown-linux-musl" || DELTA_TRIPLE="${RUST_ARCH}-unknown-linux-gnu"
+    curl -sL "https://github.com/dandavison/delta/releases/download/${DELTA_VER}/delta-${DELTA_VER}-${DELTA_TRIPLE}.tar.gz" | tar xz -C /tmp
+    mv -f "/tmp/delta-${DELTA_VER}-${DELTA_TRIPLE}/delta" "$HOME/.local/bin/delta"
+  fi
+
+  # bat
+  if ! command -v bat &>/dev/null; then
+    BAT_VER=$(gh_latest sharkdp/bat)
+    [ "$DPKG_ARCH" = amd64 ] && BAT_TRIPLE="${RUST_ARCH}-unknown-linux-musl" || BAT_TRIPLE="${RUST_ARCH}-unknown-linux-gnu"
+    curl -sL "https://github.com/sharkdp/bat/releases/download/${BAT_VER}/bat-${BAT_VER}-${BAT_TRIPLE}.tar.gz" | tar xz -C /tmp
+    mv -f "/tmp/bat-${BAT_VER}-${BAT_TRIPLE}/bat" "$HOME/.local/bin/bat"
+  fi
+
+  # zoxide (init in custom/zoxide.zsh)
+  if ! command -v zoxide &>/dev/null; then
+    curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh -s -- --bin-dir "$HOME/.local/bin"
+  fi
 
   # gh CLI
   if ! command -v gh &>/dev/null; then
     curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+    echo "deb [arch=${DPKG_ARCH} signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
     sudo apt update -qq && sudo apt install -y -qq gh
-  fi
-
-  # git-delta (use musl build to avoid glibc version issues on older distros)
-  if ! command -v delta &>/dev/null; then
-    DELTA_VER=$(curl -s https://api.github.com/repos/dandavison/delta/releases/latest | jq -r '.tag_name')
-    curl -sL "https://github.com/dandavison/delta/releases/download/${DELTA_VER}/git-delta-musl_${DELTA_VER}_$(dpkg --print-architecture).deb" -o /tmp/delta.deb
-    sudo dpkg -i /tmp/delta.deb && rm -f /tmp/delta.deb
-  fi
-
-  # node
-  if ! command -v node &>/dev/null; then
-    curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-    sudo apt install -y -qq nodejs
   fi
 fi
 
