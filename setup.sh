@@ -121,6 +121,12 @@ if [ ! -d ~/.dotfiles ]; then
   git clone --bare https://github.com/dodeca-6-tope/dotfiles.git ~/.dotfiles
 fi
 git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" fetch origin main
+# Keep macOS-only files (e.g. VSCode config under ~/Library) off Linux via sparse-checkout
+if [ "$OS" == "Linux" ]; then
+  git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" config core.sparseCheckout true
+  git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" config core.sparseCheckoutCone false
+  printf '/*\n!/Library/\n' > "$HOME/.dotfiles/info/sparse-checkout"
+fi
 git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" reset --hard FETCH_HEAD
 git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" config status.showUntrackedFiles no
 gh auth setup-git
