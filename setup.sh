@@ -143,6 +143,7 @@ P10K="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
 [ -d "$P10K" ] || git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$P10K"
 
 # --- default shell ---
-[[ "$SHELL" == */zsh ]] || chsh -s "$(which zsh)"
+# Via sudo: plain chsh prompts for an account password that containers don't have.
+[[ "$SHELL" == */zsh ]] || sudo chsh -s "$(command -v zsh)" "$USER"
 
 exec zsh -l
