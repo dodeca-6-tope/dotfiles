@@ -54,6 +54,7 @@
 	dc = diff --cached
 	di = diff --ignore-all-space
 	ds = diff --stat
+	du = diff @{u}
 	dp = "!f() { pr=$1; data=$(gh pr view $pr --json baseRefOid,headRefOid -q '.baseRefOid + \" \" + .headRefOid'); baseOid=${data%% *}; head=${data##* }; git fetch origin $baseOid $head 2>/dev/null; git diff $(git merge-base $baseOid $head)..$head; }; f"
 	dt = difftool
 	dtc = difftool --cached
