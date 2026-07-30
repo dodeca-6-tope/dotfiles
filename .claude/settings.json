@@ -1,0 +1,15 @@
+{
+  "model": "opus[1m]",
+  "enabledPlugins": {
+    "slack@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {},
+  "outputStyle": "Terse",
+  "permissions": {
+    "defaultMode": "bypassPermissions"
+  },
+  "effortLevel": "xhigh",
+  "autoMemoryEnabled": false,
+  "skipDangerousModePermissionPrompt": true,
+  "skipWorkflowUsageWarning": true
+}
