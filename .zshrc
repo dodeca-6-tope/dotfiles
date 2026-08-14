@@ -10,6 +10,7 @@ DISABLE_AUTO_TITLE="true"
 plugins=(
   fzf-tab
   zsh-autosuggestions
+  kubectl
 )
 source $ZSH/oh-my-zsh.sh
 
