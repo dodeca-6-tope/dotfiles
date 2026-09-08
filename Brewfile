@@ -2,7 +2,6 @@
 brew "bat"
 brew "cloud-sql-proxy"
 brew "coder"
-brew "docker"
 brew "dockutil"
 brew "ffmpeg"
 brew "fzf"
@@ -22,9 +21,9 @@ brew "redis", restart_service: :changed
 brew "rsync"
 brew "tmux"
 brew "tree"
+brew "uv"
 brew "wget"
 brew "zoxide"
-brew "zsh"
 brew "argocd"
 
 # Apps
