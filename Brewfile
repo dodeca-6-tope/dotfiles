@@ -1,6 +1,3 @@
-tap "coder/coder"
-tap "homebrew/services"
-
 # CLI tools
 brew "bat"
 brew "cloud-sql-proxy"
@@ -37,7 +34,6 @@ cask "discord"
 cask "docker-desktop"
 cask "font-fira-code-nerd-font"
 cask "font-meslo-lg-nerd-font"
-cask "gcloud-cli"
 cask "ghostty"
 cask "google-chrome"
 cask "slack"
