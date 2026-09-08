@@ -133,16 +133,18 @@ if ! command -v gcloud &>/dev/null; then
   rm -f "$GCLOUD_ARCHIVE"
   source "$HOME/google-cloud-sdk/path.bash.inc"
 fi
-gcloud auth print-identity-token &>/dev/null || gcloud auth login --no-launch-browser
 
 # --- github ---
-# gh writes the credential helper as an absolute path to its own binary, which
-# differs per machine, so send it to the untracked include instead of ~/.gitconfig.
+# Login is left to the user (`gh auth login`, `gcloud auth login`). Identity
+# needs a logged-in gh, so skip it when there isn't one. The credential helper
+# is an absolute path to gh, so write it to the untracked include rather than
+# the tracked ~/.gitconfig.
 GITCONFIG_LOCAL="$HOME/.gitconfig-local"
-gh auth status > /dev/null 2>&1 || GIT_CONFIG_GLOBAL="$GITCONFIG_LOCAL" gh auth login
 GIT_CONFIG_GLOBAL="$GITCONFIG_LOCAL" gh auth setup-git
-git config -f "$GITCONFIG_LOCAL" user.name "$(gh api user -q '.login')"
-git config -f "$GITCONFIG_LOCAL" user.email "$(gh api user -q '"\(.id)+\(.login)@users.noreply.github.com"')"
+if gh auth status >/dev/null 2>&1; then
+  git config -f "$GITCONFIG_LOCAL" user.name "$(gh api user -q '.login')"
+  git config -f "$GITCONFIG_LOCAL" user.email "$(gh api user -q '"\(.id)+\(.login)@users.noreply.github.com"')"
+fi
 
 # --- zsh plugins ---
 ZSH_PLUGINS="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins"
@@ -157,4 +159,4 @@ P10K="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
 # Via sudo: plain chsh prompts for an account password that containers don't have.
 [[ "$SHELL" == */zsh ]] || sudo chsh -s "$(command -v zsh)" "$USER"
 
-exec zsh -l
+[[ -t 0 ]] && exec zsh -l
