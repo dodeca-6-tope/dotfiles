@@ -70,6 +70,14 @@
 	# Log
 	l = "!base=$(git merge-base HEAD origin/HEAD 2>/dev/null); if [ -z \"$base\" ] || [ \"$(git rev-parse HEAD)\" = \"$base\" ]; then git log --oneline --first-parent; else git log --oneline $base..HEAD; fi"
 
-# Identity and gh credential helper, both written by setup.sh
+# gh on PATH, not an absolute binary, so the same file works on macOS and Linux.
+[credential "https://github.com"]
+	helper =
+	helper = !gh auth git-credential
+[credential "https://gist.github.com"]
+	helper =
+	helper = !gh auth git-credential
+
+# Identity, written by setup.sh when a gh session already exists
 [include]
 	path = ~/.gitconfig-local

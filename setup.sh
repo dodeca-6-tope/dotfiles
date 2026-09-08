@@ -140,12 +140,10 @@ if ! command -v gcloud &>/dev/null; then
 fi
 
 # --- github ---
-# Login is left to the user (`gh auth login`, `gcloud auth login`). Identity
-# needs a logged-in gh, so skip it when there isn't one. The credential helper
-# is an absolute path to gh, so write it to the untracked include rather than
-# the tracked ~/.gitconfig.
+# Don't log in, and don't run `gh auth setup-git`: both are interactive or
+# require a session. The tracked .gitconfig already points git at `gh` on PATH.
+# Identity can only be derived from the API when a session already exists.
 GITCONFIG_LOCAL="$HOME/.gitconfig-local"
-GIT_CONFIG_GLOBAL="$GITCONFIG_LOCAL" gh auth setup-git
 if gh auth status >/dev/null 2>&1; then
   git config -f "$GITCONFIG_LOCAL" user.name "$(gh api user -q '.login')"
   git config -f "$GITCONFIG_LOCAL" user.email "$(gh api user -q '"\(.id)+\(.login)@users.noreply.github.com"')"
