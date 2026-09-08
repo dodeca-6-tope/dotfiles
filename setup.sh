@@ -70,6 +70,19 @@ if [ "$OS" == "Darwin" ]; then
   defaults write com.apple.dock showAppSuggestions -bool false
   defaults write com.apple.AppleMultitouchTrackpad Clicking -bool true
   defaults write NSGlobalDomain com.apple.swipescrolldirection -bool false
+  # `defaults` persists this value but doesn't apply it to the current session.
+  # This is the same private framework call used by the Mouse settings pane.
+  /usr/bin/python3 - <<'PY'
+from ctypes import CDLL, c_bool
+
+framework = CDLL(
+    "/System/Library/PrivateFrameworks/PreferencePanesSupport.framework/PreferencePanesSupport"
+)
+set_direction = framework.setSwipeScrollDirection
+set_direction.argtypes = [c_bool]
+set_direction.restype = None
+set_direction(False)
+PY
   defaults write com.apple.finder FXPreferredViewStyle -string clmv
   dockutil --remove all --no-restart &>/dev/null
   for app in \
