@@ -208,16 +208,6 @@ if ! command -v gcloud &>/dev/null; then
   source "$HOME/google-cloud-sdk/path.bash.inc"
 fi
 
-# --- github ---
-# Don't log in, and don't run `gh auth setup-git`: both are interactive or
-# require a session. The tracked .gitconfig already points git at `gh` on PATH.
-# Identity can only be derived from the API when a session already exists.
-GITCONFIG_LOCAL="$HOME/.gitconfig-local"
-if gh auth status >/dev/null 2>&1; then
-  git config -f "$GITCONFIG_LOCAL" user.name "$(gh api user -q '.login')"
-  git config -f "$GITCONFIG_LOCAL" user.email "$(gh api user -q '"\(.id)+\(.login)@users.noreply.github.com"')"
-fi
-
 # --- zsh plugins ---
 ZSH_PLUGINS="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins"
 [ -d "$ZSH_PLUGINS/zsh-autosuggestions" ] || git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions.git "$ZSH_PLUGINS/zsh-autosuggestions"
@@ -232,6 +222,15 @@ P10K="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
 # $USER/$SHELL are not always set (empty env in some containers).
 if [[ "${SHELL:-}" != */zsh ]]; then
   sudo chsh -s "$(command -v zsh)" "$(id -un)"
+fi
+
+# --- next steps ---
+echo
+echo "Setup complete."
+GCLOUD_ACCOUNT="$(gcloud auth list --filter=status:ACTIVE --format='value(account)' 2>/dev/null)"
+if ! gh auth status >/dev/null 2>&1 || [ -z "$GCLOUD_ACCOUNT" ]; then
+  echo "To authenticate GitHub and Google Cloud, run:"
+  echo "  bash ~/auth.sh"
 fi
 
 if [[ -t 0 ]]; then

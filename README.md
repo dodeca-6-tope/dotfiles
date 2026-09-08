@@ -8,14 +8,16 @@ Setup script and config files managed with a [bare repo](https://www.atlassian.c
 bash <(curl -fsSL https://raw.githubusercontent.com/dodeca-6-tope/dotfiles/main/setup.sh)
 ```
 
-Authentication is intentionally separate:
+## Authenticate
+
+Authentication is intentionally separate from installation:
 
 ```bash
-gh auth login
-gcloud auth login
+bash ~/auth.sh
 ```
 
-Re-run the installer after GitHub login to populate `~/.gitconfig-local`.
+This signs into GitHub and Google Cloud, then writes the active GitHub
+account's commit identity to `~/.gitconfig-local`.
 
 ## Usage
 

@@ -78,6 +78,6 @@
 	helper =
 	helper = !gh auth git-credential
 
-# Identity, written by setup.sh when a gh session already exists
+# Identity, written by auth.sh
 [include]
 	path = ~/.gitconfig-local
