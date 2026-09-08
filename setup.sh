@@ -170,4 +170,6 @@ if [[ "${SHELL:-}" != */zsh ]]; then
   sudo chsh -s "$(command -v zsh)" "$(id -un)"
 fi
 
-[[ -t 0 ]] && exec zsh -l
+if [[ -t 0 ]]; then
+  exec zsh -l
+fi
