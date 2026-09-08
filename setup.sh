@@ -67,7 +67,10 @@ if [ "$OS" == "Darwin" ]; then
 elif [ "$OS" == "Linux" ]; then
   DPKG_ARCH="$(dpkg --print-architecture)"          # amd64 | arm64
   case "$DPKG_ARCH" in amd64) RUST_ARCH=x86_64 ;; arm64) RUST_ARCH=aarch64 ;; esac
-  gh_latest() { curl -s "https://api.github.com/repos/$1/releases/latest" | jq -r '.tag_name'; }
+  # Tag of the latest GitHub release, via redirect (no API, so no rate limit).
+  gh_latest() {
+    curl -sI -L -o /dev/null -w "%{url_effective}\n" "https://github.com/$1/releases/latest" | sed 's|.*/||'
+  }
 
   # Portable binaries -> ~/.local/bin: on the ephemeral container rootfs only $HOME
   # survives reboots, so these must not go under /usr.
@@ -108,7 +111,9 @@ elif [ "$OS" == "Linux" ]; then
 
   # zoxide (init in custom/zoxide.zsh)
   if ! command -v zoxide &>/dev/null; then
-    curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh -s -- --bin-dir "$HOME/.local/bin"
+    ZOXIDE_VER=$(gh_latest ajeetdsouza/zoxide)
+    ZOXIDE_VER="${ZOXIDE_VER#v}"
+    curl -fsSL "https://github.com/ajeetdsouza/zoxide/releases/download/v${ZOXIDE_VER}/zoxide-${ZOXIDE_VER}-${RUST_ARCH}-unknown-linux-musl.tar.gz" | tar xz -C "$HOME/.local/bin" zoxide
   fi
 
   # gh CLI
