@@ -70,14 +70,6 @@
 	# Log
 	l = "!base=$(git merge-base HEAD origin/HEAD 2>/dev/null); if [ -z \"$base\" ] || [ \"$(git rev-parse HEAD)\" = \"$base\" ]; then git log --oneline --first-parent; else git log --oneline $base..HEAD; fi"
 
-# Credentials (set by `gh auth setup-git`)
-[credential "https://github.com"]
-	helper = 
-	helper = !/opt/homebrew/bin/gh auth git-credential
-[credential "https://gist.github.com"]
-	helper = 
-	helper = !/opt/homebrew/bin/gh auth git-credential
-
-# Identity (injected by setup.sh into ~/.gitconfig-local)
+# Identity and gh credential helper, both written by setup.sh
 [include]
 	path = ~/.gitconfig-local

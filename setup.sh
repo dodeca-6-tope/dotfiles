@@ -136,10 +136,13 @@ fi
 gcloud auth print-identity-token &>/dev/null || gcloud auth login --no-launch-browser
 
 # --- github ---
-gh auth status > /dev/null 2>&1 || gh auth login
-gh auth setup-git
-git config -f ~/.gitconfig-local user.name "$(gh api user -q '.login')"
-git config -f ~/.gitconfig-local user.email "$(gh api user -q '"\(.id)+\(.login)@users.noreply.github.com"')"
+# gh writes the credential helper as an absolute path to its own binary, which
+# differs per machine, so send it to the untracked include instead of ~/.gitconfig.
+GITCONFIG_LOCAL="$HOME/.gitconfig-local"
+gh auth status > /dev/null 2>&1 || GIT_CONFIG_GLOBAL="$GITCONFIG_LOCAL" gh auth login
+GIT_CONFIG_GLOBAL="$GITCONFIG_LOCAL" gh auth setup-git
+git config -f "$GITCONFIG_LOCAL" user.name "$(gh api user -q '.login')"
+git config -f "$GITCONFIG_LOCAL" user.email "$(gh api user -q '"\(.id)+\(.login)@users.noreply.github.com"')"
 
 # --- zsh plugins ---
 ZSH_PLUGINS="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins"
