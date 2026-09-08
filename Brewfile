@@ -31,6 +31,7 @@ brew "zsh"
 brew "argocd"
 
 # Apps
+cask "1password"
 cask "1password-cli"
 cask "discord"
 cask "docker-desktop"
