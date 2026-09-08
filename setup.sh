@@ -65,8 +65,6 @@ if [ "$OS" == "Darwin" ]; then
 
   # macOS defaults
   defaults write com.apple.WindowManager GloballyEnabled -bool true
-  defaults write com.apple.WindowManager StandardHideWidgets -int 1
-  defaults write com.apple.WindowManager StageManagerHideWidgets -int 1
   defaults write com.apple.dock autohide -bool true
   defaults write com.apple.dock show-recents -bool false
   defaults write com.apple.dock showAppSuggestions -bool false
