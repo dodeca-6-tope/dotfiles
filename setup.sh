@@ -3,13 +3,45 @@ set -euo pipefail
 
 OS="$(uname -s)"
 
-# --- packages ---
+# --- bootstrap ---
+# Just enough of a toolchain to check out the dotfiles below.
 if [ "$OS" == "Darwin" ]; then
   if [ ! -f /opt/homebrew/bin/brew ]; then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   fi
   eval "$(/opt/homebrew/bin/brew shellenv)"
-  brew bundle install --file=~/Brewfile
+
+elif [ "$OS" == "Linux" ]; then
+  export PATH="$HOME/.local/bin:$PATH"
+  mkdir -p "$HOME/.local/bin"
+  sudo apt update -qq
+  sudo apt install -y -qq curl ffmpeg git jq tree unzip wget zsh
+fi
+
+# --- oh-my-zsh ---
+# Must run before the dotfiles checkout: the installer bails out if ~/.oh-my-zsh
+# already exists, and the repo tracks files under it.
+if [ ! -d ~/.oh-my-zsh ]; then
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended --keep-zshrc
+fi
+
+# --- dotfiles ---
+if [ ! -d ~/.dotfiles ]; then
+  git clone --bare https://github.com/dodeca-6-tope/dotfiles.git ~/.dotfiles
+fi
+git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" fetch origin main
+# Keep macOS-only files (e.g. VSCode config under ~/Library) off Linux via sparse-checkout
+if [ "$OS" == "Linux" ]; then
+  git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" config core.sparseCheckout true
+  git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" config core.sparseCheckoutCone false
+  printf '/*\n!/Library/\n' > "$HOME/.dotfiles/info/sparse-checkout"
+fi
+git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" reset --hard FETCH_HEAD
+git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" config status.showUntrackedFiles no
+
+# --- packages ---
+if [ "$OS" == "Darwin" ]; then
+  brew bundle install --file=~/Brewfile  # Brewfile comes from the checkout above
 
   # macOS defaults
   defaults write com.apple.WindowManager GloballyEnabled -bool true
@@ -33,14 +65,9 @@ if [ "$OS" == "Darwin" ]; then
   dockutil --add ~/Downloads --view fan --display stack &>/dev/null
 
 elif [ "$OS" == "Linux" ]; then
-  export PATH="$HOME/.local/bin:$PATH"
-  mkdir -p "$HOME/.local/bin"
   DPKG_ARCH="$(dpkg --print-architecture)"          # amd64 | arm64
   case "$DPKG_ARCH" in amd64) RUST_ARCH=x86_64 ;; arm64) RUST_ARCH=aarch64 ;; esac
   gh_latest() { curl -s "https://api.github.com/repos/$1/releases/latest" | jq -r '.tag_name'; }
-
-  sudo apt update -qq
-  sudo apt install -y -qq curl ffmpeg git jq tree unzip wget zsh
 
   # Portable binaries -> ~/.local/bin: on the ephemeral container rootfs only $HOME
   # survives reboots, so these must not go under /usr.
@@ -108,27 +135,8 @@ if ! command -v gcloud &>/dev/null; then
 fi
 gcloud auth print-identity-token &>/dev/null || gcloud auth login --no-launch-browser
 
-# --- oh-my-zsh ---
-if [ ! -d ~/.oh-my-zsh ]; then
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended --keep-zshrc
-fi
-
 # --- github ---
 gh auth status > /dev/null 2>&1 || gh auth login
-
-# --- dotfiles ---
-if [ ! -d ~/.dotfiles ]; then
-  git clone --bare https://github.com/dodeca-6-tope/dotfiles.git ~/.dotfiles
-fi
-git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" fetch origin main
-# Keep macOS-only files (e.g. VSCode config under ~/Library) off Linux via sparse-checkout
-if [ "$OS" == "Linux" ]; then
-  git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" config core.sparseCheckout true
-  git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" config core.sparseCheckoutCone false
-  printf '/*\n!/Library/\n' > "$HOME/.dotfiles/info/sparse-checkout"
-fi
-git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" reset --hard FETCH_HEAD
-git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" config status.showUntrackedFiles no
 gh auth setup-git
 git config -f ~/.gitconfig-local user.name "$(gh api user -q '.login')"
 git config -f ~/.gitconfig-local user.email "$(gh api user -q '"\(.id)+\(.login)@users.noreply.github.com"')"
