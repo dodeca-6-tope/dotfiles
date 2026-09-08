@@ -72,24 +72,29 @@ elif [ "$OS" == "Linux" ]; then
   # Portable binaries -> ~/.local/bin: on the ephemeral container rootfs only $HOME
   # survives reboots, so these must not go under /usr.
 
-  # tmux (static build)
+  # tmux: static amd64 build lives in $HOME so it survives ephemeral rootfs
+  # resets. No arm64 asset is published, so use apt there.
   if ! command -v tmux &>/dev/null; then
-    TMUX_VER=$(gh_latest mjakob-gh/build-static-tmux)
-    curl -sL "https://github.com/mjakob-gh/build-static-tmux/releases/download/${TMUX_VER}/tmux.linux-${DPKG_ARCH}.stripped.gz" | gzip -dc > "$HOME/.local/bin/tmux"
-    chmod +x "$HOME/.local/bin/tmux"
+    if [ "$DPKG_ARCH" = amd64 ]; then
+      TMUX_VER=$(gh_latest mjakob-gh/build-static-tmux)
+      curl -fsSL "https://github.com/mjakob-gh/build-static-tmux/releases/download/${TMUX_VER}/tmux.linux-${DPKG_ARCH}.stripped.gz" | gzip -dc > "$HOME/.local/bin/tmux"
+      chmod +x "$HOME/.local/bin/tmux"
+    else
+      sudo apt install -y -qq tmux
+    fi
   fi
 
   # fzf (apt version is too old, no --tmux support)
   if ! command -v fzf &>/dev/null; then
     FZF_VER=$(gh_latest junegunn/fzf)
-    curl -sL "https://github.com/junegunn/fzf/releases/download/${FZF_VER}/fzf-${FZF_VER#v}-linux_${DPKG_ARCH}.tar.gz" | tar xz -C "$HOME/.local/bin"
+    curl -fsSL "https://github.com/junegunn/fzf/releases/download/${FZF_VER}/fzf-${FZF_VER#v}-linux_${DPKG_ARCH}.tar.gz" | tar xz -C "$HOME/.local/bin"
   fi
 
   # git-delta (musl build avoids glibc issues on older distros)
   if ! command -v delta &>/dev/null; then
     DELTA_VER=$(gh_latest dandavison/delta)
     [ "$DPKG_ARCH" = amd64 ] && DELTA_TRIPLE="${RUST_ARCH}-unknown-linux-musl" || DELTA_TRIPLE="${RUST_ARCH}-unknown-linux-gnu"
-    curl -sL "https://github.com/dandavison/delta/releases/download/${DELTA_VER}/delta-${DELTA_VER}-${DELTA_TRIPLE}.tar.gz" | tar xz -C /tmp
+    curl -fsSL "https://github.com/dandavison/delta/releases/download/${DELTA_VER}/delta-${DELTA_VER}-${DELTA_TRIPLE}.tar.gz" | tar xz -C /tmp
     mv -f "/tmp/delta-${DELTA_VER}-${DELTA_TRIPLE}/delta" "$HOME/.local/bin/delta"
   fi
 
@@ -97,7 +102,7 @@ elif [ "$OS" == "Linux" ]; then
   if ! command -v bat &>/dev/null; then
     BAT_VER=$(gh_latest sharkdp/bat)
     [ "$DPKG_ARCH" = amd64 ] && BAT_TRIPLE="${RUST_ARCH}-unknown-linux-musl" || BAT_TRIPLE="${RUST_ARCH}-unknown-linux-gnu"
-    curl -sL "https://github.com/sharkdp/bat/releases/download/${BAT_VER}/bat-${BAT_VER}-${BAT_TRIPLE}.tar.gz" | tar xz -C /tmp
+    curl -fsSL "https://github.com/sharkdp/bat/releases/download/${BAT_VER}/bat-${BAT_VER}-${BAT_TRIPLE}.tar.gz" | tar xz -C /tmp
     mv -f "/tmp/bat-${BAT_VER}-${BAT_TRIPLE}/bat" "$HOME/.local/bin/bat"
   fi
 
