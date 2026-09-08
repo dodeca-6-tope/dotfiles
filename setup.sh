@@ -160,6 +160,9 @@ P10K="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
 
 # --- default shell ---
 # Via sudo: plain chsh prompts for an account password that containers don't have.
-[[ "$SHELL" == */zsh ]] || sudo chsh -s "$(command -v zsh)" "$USER"
+# $USER/$SHELL are not always set (empty env in some containers).
+if [[ "${SHELL:-}" != */zsh ]]; then
+  sudo chsh -s "$(command -v zsh)" "$(id -un)"
+fi
 
 [[ -t 0 ]] && exec zsh -l
