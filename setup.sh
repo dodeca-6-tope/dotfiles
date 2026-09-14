@@ -35,7 +35,7 @@ elif [ "$OS" == "Linux" ]; then
   export PATH="$HOME/.local/bin:$PATH"
   mkdir -p "$HOME/.local/bin"
   sudo apt update -qq
-  sudo env DEBIAN_FRONTEND=noninteractive apt install -y -qq curl git jq tree unzip wget zsh
+  sudo env DEBIAN_FRONTEND=noninteractive apt install -y -qq curl git gzip tar zsh
 fi
 
 # --- oh-my-zsh ---
@@ -49,15 +49,17 @@ fi
 if [ ! -d ~/.dotfiles ]; then
   git clone --bare https://github.com/dodeca-6-tope/dotfiles.git ~/.dotfiles
 fi
-git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" fetch origin main
-# Keep macOS-only files (e.g. VSCode config under ~/Library) off Linux via sparse-checkout
+DOTFILES=(git --git-dir="$HOME/.dotfiles" --work-tree="$HOME")
+"${DOTFILES[@]}" fetch origin main
+# Keep macOS-only files under ~/Library off Linux.
 if [ "$OS" == "Linux" ]; then
-  git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" config core.sparseCheckout true
-  git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" config core.sparseCheckoutCone false
+  "${DOTFILES[@]}" config core.sparseCheckout true
+  "${DOTFILES[@]}" config core.sparseCheckoutCone false
   printf '/*\n!/Library/\n' > "$HOME/.dotfiles/info/sparse-checkout"
 fi
-git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" reset --hard FETCH_HEAD
-git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" config status.showUntrackedFiles no
+# The remote is authoritative: rerunning setup discards local changes to tracked dotfiles.
+"${DOTFILES[@]}" reset --hard FETCH_HEAD
+"${DOTFILES[@]}" config status.showUntrackedFiles no
 
 # --- packages ---
 if [ "$OS" == "Darwin" ]; then
@@ -77,15 +79,6 @@ elif [ "$OS" == "Linux" ]; then
   # Tag of the latest GitHub release, via redirect (no API, so no rate limit).
   gh_latest() {
     curl -fsSIL -o /dev/null -w "%{url_effective}\n" "https://github.com/$1/releases/latest" | sed 's|.*/||'
-  }
-
-  # musl builds tolerate older glibc, but upstreams only publish them for amd64.
-  libc_triple() {
-    if [ "$DPKG_ARCH" = amd64 ]; then
-      echo "${RUST_ARCH}-unknown-linux-musl"
-    else
-      echo "${RUST_ARCH}-unknown-linux-gnu"
-    fi
   }
 
   # Install release binaries under $HOME, since apt either has no package for
@@ -120,25 +113,14 @@ elif [ "$OS" == "Linux" ]; then
 
   if ! command -v delta &>/dev/null; then
     DELTA_VER=$(gh_latest dandavison/delta)
-    DELTA_TRIPLE="$(libc_triple)"
+    # The musl build tolerates older glibc; upstream only publishes it for amd64.
+    [ "$DPKG_ARCH" = amd64 ] && DELTA_TRIPLE="${RUST_ARCH}-unknown-linux-musl" || DELTA_TRIPLE="${RUST_ARCH}-unknown-linux-gnu"
     install_release_tar "https://github.com/dandavison/delta/releases/download/${DELTA_VER}/delta-${DELTA_VER}-${DELTA_TRIPLE}.tar.gz" "delta-${DELTA_VER}-${DELTA_TRIPLE}/" delta
-  fi
-
-  if ! command -v bat &>/dev/null; then
-    BAT_VER=$(gh_latest sharkdp/bat)
-    BAT_TRIPLE="$(libc_triple)"
-    install_release_tar "https://github.com/sharkdp/bat/releases/download/${BAT_VER}/bat-${BAT_VER}-${BAT_TRIPLE}.tar.gz" "bat-${BAT_VER}-${BAT_TRIPLE}/" bat
   fi
 
   if ! command -v zoxide &>/dev/null; then
     ZOXIDE_VER="$(gh_latest ajeetdsouza/zoxide)"
     install_release_tar "https://github.com/ajeetdsouza/zoxide/releases/download/${ZOXIDE_VER}/zoxide-${ZOXIDE_VER#v}-${RUST_ARCH}-unknown-linux-musl.tar.gz" "" zoxide
-  fi
-
-  if ! command -v uv &>/dev/null; then
-    UV_VER=$(gh_latest astral-sh/uv)
-    UV_TRIPLE="${RUST_ARCH}-unknown-linux-gnu"
-    install_release_tar "https://github.com/astral-sh/uv/releases/download/${UV_VER}/uv-${UV_TRIPLE}.tar.gz" "uv-${UV_TRIPLE}/" uv uvx
   fi
 
   if ! command -v gh &>/dev/null; then
@@ -151,13 +133,13 @@ fi
 
 # --- macOS preferences ---
 if [ "$OS" == "Darwin" ]; then
-  defaults write com.apple.WindowManager GloballyEnabled -bool true
-  defaults write com.apple.dock autohide -bool true
-  defaults write com.apple.dock show-recents -bool false
-  defaults write com.apple.dock showAppSuggestions -bool false
-  defaults write com.apple.AppleMultitouchTrackpad Clicking -bool true
-  defaults write com.apple.finder FXPreferredViewStyle -string clmv
-  defaults write NSGlobalDomain com.apple.swipescrolldirection -bool false
+  defaults write com.apple.WindowManager GloballyEnabled -bool true        # Stage Manager
+  defaults write com.apple.dock autohide -bool true                        # Hide Dock
+  defaults write com.apple.dock show-recents -bool false                   # No recent apps
+  defaults write com.apple.dock showAppSuggestions -bool false             # No suggestions
+  defaults write com.apple.AppleMultitouchTrackpad Clicking -bool true     # Tap to click
+  defaults write com.apple.finder FXPreferredViewStyle -string clmv        # Column view
+  defaults write NSGlobalDomain com.apple.swipescrolldirection -bool false # Traditional scrolling
   # `defaults` persists this value but doesn't apply it to the current session.
   # This is the same private framework call used by the Mouse settings pane.
   /usr/bin/python3 - <<'PY'
@@ -172,6 +154,7 @@ set_direction.restype = None
 set_direction(False)
 PY
 
+  # Rebuild the Dock with only these applications and Downloads.
   dockutil --remove all --no-restart &>/dev/null
   for app in \
     "/System/Applications/System Settings.app" \
