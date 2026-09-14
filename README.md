@@ -16,8 +16,8 @@ Authentication is intentionally separate from installation:
 bash ~/auth.sh
 ```
 
-This signs into GitHub and Google Cloud, then writes the active GitHub
-account's commit identity to `~/.gitconfig-local`.
+This signs into GitHub, then writes the active GitHub account's commit
+identity to `~/.gitconfig-local`.
 
 ## Usage
 

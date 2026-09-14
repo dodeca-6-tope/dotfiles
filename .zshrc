@@ -10,17 +10,12 @@ DISABLE_AUTO_TITLE="true"
 plugins=(
   fzf-tab
   zsh-autosuggestions
-  kubectl
 )
 source $ZSH/oh-my-zsh.sh
 
 # PATH
 [[ -d /opt/homebrew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
 export PATH="$HOME/.local/bin:$PATH"
-
-# Google Cloud SDK
-[[ -f "$HOME/google-cloud-sdk/path.zsh.inc" ]] && source "$HOME/google-cloud-sdk/path.zsh.inc"
-[[ -f "$HOME/google-cloud-sdk/completion.zsh.inc" ]] && source "$HOME/google-cloud-sdk/completion.zsh.inc"
 
 # Secrets
 [[ -f ~/.secrets ]] && source ~/.secrets

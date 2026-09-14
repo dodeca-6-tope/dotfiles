@@ -87,7 +87,6 @@ PY
   dockutil --remove all --no-restart &>/dev/null
   for app in \
     "/System/Applications/System Settings.app" \
-    "/Applications/Slack.app" \
     "/Applications/Ghostty.app" \
     "/Applications/1Password.app" \
     "/Applications/Google Chrome.app" \
@@ -112,11 +111,9 @@ elif [ "$OS" == "Linux" ]; then
     curl -fsSIL -o /dev/null -w "%{url_effective}\n" "https://github.com/$1/releases/latest" | sed 's|.*/||'
   }
 
-  # Portable binaries -> ~/.local/bin: on the ephemeral container rootfs only $HOME
-  # survives reboots, so these must not go under /usr.
+  # Portable binaries -> ~/.local/bin so they stay in $HOME.
 
-  # tmux: static amd64 build lives in $HOME so it survives ephemeral rootfs
-  # resets. No arm64 asset is published, so use apt there.
+  # tmux: static amd64 build. No arm64 asset is published, so use apt there.
   if ! command -v tmux &>/dev/null; then
     if [ "$DPKG_ARCH" = amd64 ]; then
       TMUX_VER=$(gh_latest mjakob-gh/build-static-tmux)
@@ -188,26 +185,6 @@ if [ "$OS" == "Darwin" ]; then
   corepack enable
 fi
 
-# --- gcloud ---
-if [ -f "$HOME/google-cloud-sdk/path.bash.inc" ]; then
-  # shellcheck source=/dev/null
-  source "$HOME/google-cloud-sdk/path.bash.inc"
-fi
-
-if ! command -v gcloud &>/dev/null; then
-  case "$OS-$ARCH" in
-    Darwin-arm64)  GCLOUD_ARCHIVE="google-cloud-cli-darwin-arm.tar.gz" ;;
-    Darwin-x86_64) GCLOUD_ARCHIVE="google-cloud-cli-darwin-x86_64.tar.gz" ;;
-    Linux-x86_64)  GCLOUD_ARCHIVE="google-cloud-cli-linux-x86_64.tar.gz" ;;
-    Linux-aarch64) GCLOUD_ARCHIVE="google-cloud-cli-linux-arm.tar.gz" ;;
-  esac
-  curl -fsSL "https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/${GCLOUD_ARCHIVE}" -o "$TMP_DIR/$GCLOUD_ARCHIVE"
-  tar -xf "$TMP_DIR/$GCLOUD_ARCHIVE" -C "$HOME"
-  "$HOME/google-cloud-sdk/install.sh" --quiet
-  # shellcheck source=/dev/null
-  source "$HOME/google-cloud-sdk/path.bash.inc"
-fi
-
 # --- zsh plugins ---
 ZSH_PLUGINS="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins"
 [ -d "$ZSH_PLUGINS/zsh-autosuggestions" ] || git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions.git "$ZSH_PLUGINS/zsh-autosuggestions"
@@ -227,9 +204,8 @@ fi
 # --- next steps ---
 echo
 echo "Setup complete."
-GCLOUD_ACCOUNT="$(gcloud auth list --filter=status:ACTIVE --format='value(account)' 2>/dev/null)"
-if ! gh auth status >/dev/null 2>&1 || [ -z "$GCLOUD_ACCOUNT" ]; then
-  echo "To authenticate GitHub and Google Cloud, run:"
+if ! gh auth status >/dev/null 2>&1; then
+  echo "To authenticate GitHub, run:"
   echo "  bash ~/auth.sh"
 fi
 
