@@ -88,7 +88,6 @@ PY
   for app in \
     "/System/Applications/System Settings.app" \
     "/Applications/Ghostty.app" \
-    "/Applications/1Password.app" \
     "/Applications/Google Chrome.app" \
     "/Applications/Visual Studio Code.app" \
     "/System/Applications/Utilities/Activity Monitor.app"; do

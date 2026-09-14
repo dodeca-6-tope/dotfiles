@@ -17,7 +17,6 @@ brew "wget"
 brew "zoxide"
 
 # Apps
-cask "1password"
 cask "font-fira-code-nerd-font"
 cask "font-meslo-lg-nerd-font"
 cask "ghostty"
