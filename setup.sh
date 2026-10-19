@@ -118,6 +118,11 @@ elif [ "$OS" == "Linux" ]; then
     install_release_tar "https://github.com/dandavison/delta/releases/download/${DELTA_VER}/delta-${DELTA_VER}-${DELTA_TRIPLE}.tar.gz" "delta-${DELTA_VER}-${DELTA_TRIPLE}/" delta
   fi
 
+  if ! command -v starship &>/dev/null; then
+    STARSHIP_VER="$(gh_latest starship/starship)"
+    install_release_tar "https://github.com/starship/starship/releases/download/${STARSHIP_VER}/starship-${RUST_ARCH}-unknown-linux-musl.tar.gz" "" starship
+  fi
+
   if ! command -v zoxide &>/dev/null; then
     ZOXIDE_VER="$(gh_latest ajeetdsouza/zoxide)"
     install_release_tar "https://github.com/ajeetdsouza/zoxide/releases/download/${ZOXIDE_VER}/zoxide-${ZOXIDE_VER#v}-${RUST_ARCH}-unknown-linux-musl.tar.gz" "" zoxide
@@ -171,10 +176,6 @@ fi
 ZSH_PLUGINS="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins"
 [ -d "$ZSH_PLUGINS/zsh-autosuggestions" ] || git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions.git "$ZSH_PLUGINS/zsh-autosuggestions"
 [ -d "$ZSH_PLUGINS/fzf-tab" ] || git clone --depth=1 https://github.com/Aloxaf/fzf-tab.git "$ZSH_PLUGINS/fzf-tab"
-
-# --- powerlevel10k ---
-P10K="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
-[ -d "$P10K" ] || git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$P10K"
 
 # --- default shell ---
 # Via sudo: plain chsh prompts for an account password that containers don't have.

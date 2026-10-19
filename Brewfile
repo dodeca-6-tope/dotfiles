@@ -3,6 +3,7 @@ brew "dockutil"
 brew "fzf"
 brew "gh"
 brew "git-delta"
+brew "starship"
 brew "tmux"
 brew "zoxide"
 
